@@ -158,8 +158,6 @@ double minimax(char * campo, int jogador, double alpha, double beta, int depth, 
 	return v;
 }
 
-
-
 double estimativa(char campo[], int tam, int bola, int jogador){
 	int qt_e = 0;
 	int qt_d = 0;
@@ -245,15 +243,20 @@ void parse_mov(char *buf, char *rl, char *rm, int *rf, int *rs, int *rb) {
 }
 
 int gerar_movimentos(char* campo, int tam, int jogador, int bola, char** movimentos){
+	int qt_movimentos_possiveis = 0;
+
 	if(jogador>0){
 		if(bola==0 && campo[1]=='.'){
 			//coloca 'f'
+			qt_movimentos_possiveis++;
 		}else if(bola==0 && campo[1]=='f'){
 			//posso pular ou colocar algum f em alguma posicão
+			qt_movimentos_possiveis++;
 		}else if(bola!=0){
 			for(int i=0;i<bola;i++){
 				if(campo[i]=='.'){
 					//posso colocar um f aqui
+					qt_movimentos_possiveis++;
 				}
 			}
 			int qt_ponto = 0;
@@ -261,6 +264,7 @@ int gerar_movimentos(char* campo, int tam, int jogador, int bola, char** movimen
 				for(int i = bola-2;i>=-1;i--){
 					if(i==-1){
 						//jogador pode vencer nessa jogada
+						qt_movimentos_possiveis++;
 					}
 					if(campo[i]=='.' && qt_ponto<1){
 						qt_ponto++;
@@ -273,11 +277,47 @@ int gerar_movimentos(char* campo, int tam, int jogador, int bola, char** movimen
 						continue;
 					}
 					//posso saltar para i
+					qt_movimentos_possiveis++;
 				}
 			}
 		}
+	}else{
+		if(bola==tam-1 && campo[tam-1]=='.'){
+			//coloca 'f'
+			qt_movimentos_possiveis++;
+		}else if(bola==tam-1 && campo[1]=='f'){
+			//posso pular ou colocar algum f em alguma posicão
+			qt_movimentos_possiveis++;
+		}else if(bola!=tam-1){
+			for(int i=bola;i>=0;i--){
+				if(campo[i]=='.'){
+					//posso colocar um f aqui
+					qt_movimentos_possiveis++;
+				}
+			}
+			int qt_ponto = 0;
+			if(campo[bola+1]=='f'){
+				for(int i = bola+2;i<=tam+1;i++){
+					if(i==tam+1){
+						qt_movimentos_possiveis++;
+					}
+					if(campo[i]=='.' && qt_ponto<1){
+						qt_ponto++;
+					}
+					if(qt_ponto>1){
+						break;
+					}
+					if(campo[i]=='f'){
+						qt_ponto = 0;
+						continue;
+					}
+					//posso saltar para i
+					qt_movimentos_possiveis++;
+				}
+			}
+		}		
 	}
-	return 0;
+	return qt_movimentos_possiveis;
 }
 
 bool pode_vencer(char campo[], int jogador, int tam){
