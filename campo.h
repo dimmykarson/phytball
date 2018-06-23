@@ -10,11 +10,13 @@ typedef struct {
   char player;
   char tipo;
   int posicao;
-  int* saltos;
+  int qt_saltos;
+  int * saltos;
   bool nula;
   double h;
   bool terminal;
   char* campo;
+  char* mov;
 } movimento;
 
 #endif
