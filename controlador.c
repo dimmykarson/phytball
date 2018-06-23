@@ -32,7 +32,7 @@ redisContext* inicia(int argc, char **argv, char *lado, int *tam,
   *jogadas = atoi(argv[3]);
   strcpy(tempo, argv[4]);
   ip  = (argc > 5) ? argv[5] : "127.0.0.1";
-  porta = (argc > 6) ? atoi(argv[6]) : 6379;
+  porta = (argc > 6) ? atoi(argv[6]) : 10001;
 
   rediscontext = redisConnect(ip, porta);
   if (rediscontext == NULL || rediscontext->err) {
@@ -56,8 +56,9 @@ void parse_mov(char *buf, char *rl, char *rm, int *rf, int *rs, int *rb) {
       sscanf(strtok(NULL, " \n"), "%d", rf);
     else {
       sscanf(strtok(NULL, " \n"), "%d", rs);
-      for(i = 0; i < *rs; i++)
-	sscanf(strtok(NULL, " \n"), "%d", &(rb[i]));
+      for(i = 0; i < *rs; i++){
+        sscanf(strtok(NULL, " \n"), "%d", &(rb[i]));
+      }
     }
   }
 }

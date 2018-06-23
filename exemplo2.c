@@ -14,6 +14,7 @@ int main(int argc, char **argv) {
   campo_conecta(argc, argv);
 
   while(1) {
+    printf("1");
     campo_recebe(buf);
     printf("%s", buf);
     linha = readline(NULL);
