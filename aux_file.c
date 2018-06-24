@@ -114,176 +114,51 @@ double minimax(char campo[], int jogador, double alpha, double beta, int depth, 
 
 
 double estimativa(char campo[], int tam, int bola, int jogador, char lado_meu){
-	printf("Estimando...\n");
-	int i_bola = get_bola(campo, tam);
-
-	char campo_e[tam];
-	transform_e(campo, campo_e, i_bola, tam);
-	printf("\nFim transform_e ex");
-	int i_bola_e = i_bola+1;
-	printf("\nBola nova");
-	int sum_e[2];
-	summing_e(campo_e, i_bola_e, tam, sum_e);
-	int p_e = pl(sum_e[0], sum_e[1]);
-
-	char campo_d[tam];
-	transform_d(campo, campo_d, i_bola, tam);
-	int i_bola_d = i_bola-1;
-	int sum_d[2];
-	summing_d(campo_d, i_bola_d, tam, sum_d);
-	int p_d = pl(sum_d[0], sum_d[1]);
-
-	if(p_e < p_d)
-		return 1;
-	if(p_e > p_d)
-		return -1;
-	printf("\nFIM Estimando...\n");
+	int sum_e_p = 0;
+	int sum_e_f = 0;
+	int qt_e_p_seq = 0;
+	int qt_e_p_group_seq=0;
+	int i_bola = -1;
+	int sum_d_p = 0;
+	int sum_d_f = 0;
+	int qt_d_p_seq = 0;
+	int qt_d_p_group_seq=0;
+	bool check_bola = false;
+	for(int i = 0;i<tam;i++){
+		if(campo[i]=='o'){
+			i_bola = i;
+			check_bola=true;
+			continue;
+		}
+		if(!check_bola){
+			if(campo[i]=='.'){
+				sum_e_p++;
+				qt_e_p_seq++;
+			}
+			if(campo[i]=='f'){
+				sum_e_f++;
+				if(qt_e_p_seq>1){
+					qt_e_p_group_seq++;
+				}
+				qt_e_p_seq=0;
+			}
+		}else{
+			if(campo[i]=='.'){
+				sum_d_p++;
+				qt_d_p_seq++;
+			}
+			if(campo[i]=='f'){
+				sum_d_f++;
+				if(qt_d_p_seq>1){
+					qt_d_p_group_seq++;
+				}
+				qt_d_p_seq=0;
+			}
+		}
+		
+	}
+	
 	return 0;
-}
-
-
-void transform_e(char campo[], char campo_target[], int i_bola, int tam){
-	printf("t1\n");
-	strcpy(campo_target, campo);
-	printf("t2\n");
-	int i_sub = i_bola+1;
-	campo_target[i_bola] = campo_target[i_sub];
-	printf("t3\n");
-	campo_target[i_sub] = 'o';
-	int qt_impar = 0;
-	int max_impar = -1;
-	printf("=i_sub=%d\n", i_sub);
-	printf("=tam=%d\n", tam);
-
-	for(int i = i_sub;i<tam;i++){
-		printf("%d.", i);
-		if(campo_target[i]=='.'){
-			qt_impar++;
-			max_impar=i;
-		}else{
-			if(qt_impar%2!=0){
-				campo_target[max_impar]='f';
-				qt_impar = 0;
-				max_impar = -1;	
-			}
-		}
-		if(i==tam-1){
-			if(qt_impar%2!=0){
-				campo_target[max_impar]='f';
-				qt_impar = 0;
-				max_impar = -1;	
-			}	
-		}
-		printf(".");
-	}
-	printf("\nFIM>>transform_e");
-}
-
-void summing_e(char campo[], int bola, int tam, int sum[]){
-	int bsum = 0;
-	int psum = 0;
-	for(int i = tam-1;i>=bola;i--){
-		if(i==bola){
-			if(campo[i]=='.'){
-				bsum++;
-				psum++;
-			}
-			if(bsum>0 && campo[i]=='f'){
-				bsum--;
-			}
-		}else{
-			if(campo[i]=='.'){
-				bsum++;
-				psum++;
-			}
-			if(bsum>0 && campo[i]=='f'){
-				bsum--;
-			}
-			if(psum>0 && campo[i]=='f'){
-				psum--;
-			}	
-		}
-		
-	}
-	sum[0] = bsum;
-	sum[1] = psum;
-}
-
-
-
-
-int pl(int bsum, int psum){
-	int p_e = 0;
-	int kno = 0;
-	if(bsum == psum){
-		kno=1;
-	}
-	p_e = floor(bsum/4)+(1-kno);
-
-	return p_e;
-}
-
-
-
-
-//Estimativa para d
-void summing_d(char campo[], int bola, int tam, int sum[]){
-	int bsum = 0;
-	int psum = 0;
-	for(int i = 0;i<=bola;i++){
-		if(i==bola){
-			if(campo[i]=='.'){
-				bsum++;
-				psum++;
-			}
-			if(bsum>0 && campo[i]=='f'){
-				bsum--;
-			}
-		}else{
-			if(campo[i]=='.'){
-				bsum++;
-				psum++;
-			}
-			if(bsum>0 && campo[i]=='f'){
-				bsum--;
-			}
-			if(psum>0 && campo[i]=='f'){
-				psum--;
-			}	
-		}
-		
-	}
-	sum[0] = bsum;
-	sum[1] = psum;
-}
-
-void transform_d(char campo[], char pl[], int i_bola, int tam){
-	strcpy(pl, campo);
-	int i_sub = i_bola-1;
-	pl[i_bola] = pl[i_sub];
-	pl[i_sub] = 'o';
-	int qt_impar = 0;
-	int max_impar = -1;
-	for(int i = i_sub;i>=0;i--){
-		if(pl[i]=='.'){
-			qt_impar++;
-			max_impar=i;
-		}else{
-			if(qt_impar%2!=0){
-				pl[max_impar]='f';
-				qt_impar = 0;
-				max_impar = -1;	
-			}
-		}
-		if(i==0){
-			if(qt_impar%2!=0){
-				pl[max_impar]='f';
-				qt_impar = 0;
-				max_impar = -1;	
-			}	
-		}
-	}
-	return pl;
 }
 
 //Obtem index da bola
