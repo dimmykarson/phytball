@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "testcampo.h"
+#include "campo.h"
 #include <stdbool.h>
 #include <float.h>
 #include <math.h>
@@ -16,55 +16,39 @@
 
 
 movimento def_movimento(char campo[], int tam, char lado_meu);
-int gerar_movimentos(char* campo, int tam, int jogador, int bola, movimento movimentos[], char lado_meu);
-
+int gerar_movimentos(char campo[], int tam, int jogador, int bola, movimento movimentos[], char lado_meu);
 bool pode_vencer(char campo[], int jogador, int tam);
-double minimax(char * campo, int jogador, double alpha, double beta, int depth, int tam, char lado_meu, char jogador_vez);
-
-
-
+double minimax(char campo[], int jogador, double alpha, double beta, int depth, int tam, char lado_meu, char jogador_vez);
 double estimativa(char campo[], int tam, int bola, int jogador, char lado_meu);
-void parse_mov(char *buf, char *rl, char *rm, int *rf, int *rs, int *rb);
-int aplica_mov(char *buf, char *campo, int tam, char rl, char rm, int rf, int rs, int *rb);
-int get_bola(char * campo, int tam);
-
+int aplica_mov(char campo[], char resultado[], int tam, char rl, char rm, int rf, int rs, int *rb);
+int get_bola(char campo[], int tam);
 double sigmoide(double x);
-
-
-char * transform_e(char * campo, int i_bola, int tam);
-void summing_e(char * campo, int bola, int tam, int sum[]);
+void transform_e(char campo[], char alvo[], int i_bola, int tam);
+void summing_e(char campo[], int bola, int tam, int sum[]);
 int pl(int bsum, int psum);
-
-
-char * transform_d(char * campo, int i_bola, int tam);
-void summing_d(char * campo, int bola, int tam, int sum[]);
-
-char *array_to_str(char * str, int *array, unsigned int n);
+void transform_d(char campo[],  char alvo[], int i_bola, int tam);
+void summing_d(char campo[], int bola, int tam, int sum[]);
+char * array_to_str(char * str, int *array, unsigned int n);
 
 
 int main(int argc, char **argv) {
 	char buf[MAXSTR];
+	char lado_meu; 
+	char lado_adv; 
 	char * campo; 
-	char lado_meu; //'e' se seu lado Ã© o esquerdo
-	char lado_adv; //'d' se seu lado Ã© o esquerdo
-	char mov_adv; // ultima jogada do oponente f ou o ou n
-	int tam_campo;//tamanho do campo
-	int pos_filo;
-	int pos_bola[MAXINT];
-	int num_saltos;
-	int i;
-
-  	campo = "......o......";
-  	
+	int tam_campo; 
+	campo = "f....fo....ff";
   	tam_campo = 13;
   	lado_meu = 'e';
-  	
   	movimento mov = def_movimento(campo, tam_campo, lado_meu);
-  	printf("%s\n", mov.mov);
+  	printf("Fazendo movimento: %s\n", mov.mov);
+
+	printf("<<<<<<<<<<<FIM>>>>>>>>>>>\n");
 }
 
 movimento def_movimento(char campo[], int tam, char lado_meu){
 	movimento mov_to_do;
+	printf("Definindo movimento para %s\n", campo);
 	double aux = -INFINITY;
 	movimento acoes[MAXACOES];
 	int bola = get_bola(campo, tam);
@@ -79,17 +63,7 @@ movimento def_movimento(char campo[], int tam, char lado_meu){
 	return mov_to_do;
 }
 
-int get_bola(char * campo, int tam){
-	for(int i = 0;i<tam;i++){
-		if(campo[i]=='o'){
-			return i;
-		}
-	}
-	return -1;
-}
-
-
-double minimax(char * campo, int jogador, double alpha, double beta, int depth, int tam, char lado_meu, char jogador_vez){
+double minimax(char campo[], int jogador, double alpha, double beta, int depth, int tam, char lado_meu, char jogador_vez){
 	movimento acoes[MAXACOES];
 	int bola = get_bola(campo, tam);
 	char prox_lado_a_jogar='e';
@@ -102,21 +76,12 @@ double minimax(char * campo, int jogador, double alpha, double beta, int depth, 
 
 	double v = 0;
 	if(jogador>0){
+
 		v = -INFINITY;
 		int qt_movimentos_possiveis= gerar_movimentos(campo, tam, jogador, bola, acoes, jogador_vez);
 		for(int i = 0;i<qt_movimentos_possiveis;i++){
-			//Gerando No para ação i
-			char * result;
+			char result[tam];
 			movimento mov = acoes[i];
-			/**
-			char rl;
-	  		char rm;
-	  		int rf;
-	  		int rs;
-	  		int rb[MAXINT];
-			parse_mov(mov.mov, &rl, &rm, &rf, &rs, rb);
-			**/
-			result = (char*)malloc(sizeof(campo));
 			aplica_mov(campo, result, tam, jogador_vez, mov.tipo, mov.posicao, mov.qt_saltos, mov.saltos);
 			int depth_aux = depth-1;
 			double mm = minimax(result, -jogador, alpha, beta, depth_aux, tam, lado_meu, prox_lado_a_jogar);
@@ -131,18 +96,8 @@ double minimax(char * campo, int jogador, double alpha, double beta, int depth, 
 		v = INFINITY;
 		int qt_movimentos_possiveis= gerar_movimentos(campo, tam, jogador, bola, acoes, jogador_vez);
 		for(int i = 0;i<qt_movimentos_possiveis;i++){
-			//Gerando No para ação i
-			char * result;
+			char result[tam];
 			movimento mov = acoes[i];
-			/**
-			char rl;
-	  		char rm;
-	  		int rf;
-	  		int rs;
-	  		int rb[MAXINT];
-			parse_mov(mov.mov, &rl, &rm, &rf, &rs, rb);
-			**/
-			result = (char*)malloc(sizeof(campo));
 			aplica_mov(campo, result, tam, jogador_vez, mov.tipo, mov.posicao, mov.qt_saltos, mov.saltos);
 			int depth_aux = depth-1;
 			double mm = minimax(result, -jogador, alpha, beta, depth_aux, tam, lado_meu, prox_lado_a_jogar);
@@ -156,29 +111,201 @@ double minimax(char * campo, int jogador, double alpha, double beta, int depth, 
 	}
 }
 
+
+
 double estimativa(char campo[], int tam, int bola, int jogador, char lado_meu){
+	printf("Estimando...\n");
 	int i_bola = get_bola(campo, tam);
-	char * campo_e = transform_e(campo, i_bola, tam);
-	int i_bola_e = get_bola(campo_e, tam);
+
+	char campo_e[tam];
+	transform_e(campo, campo_e, i_bola, tam);
+	printf("\nFim transform_e ex");
+	int i_bola_e = i_bola+1;
+	printf("\nBola nova");
 	int sum_e[2];
-	summing_e(campo_e, i_bola, tam, sum_e);
+	summing_e(campo_e, i_bola_e, tam, sum_e);
 	int p_e = pl(sum_e[0], sum_e[1]);
 
-    char * campo_d = transform_d(campo, i_bola, tam);
-	int i_bola_d = get_bola(campo_d, tam);
+	char campo_d[tam];
+	transform_d(campo, campo_d, i_bola, tam);
+	int i_bola_d = i_bola-1;
 	int sum_d[2];
-	summing_d(campo_d, i_bola, tam, sum_d);
+	summing_d(campo_d, i_bola_d, tam, sum_d);
 	int p_d = pl(sum_d[0], sum_d[1]);
 
 	if(p_e < p_d)
 		return 1;
 	if(p_e > p_d)
 		return -1;
+	printf("\nFIM Estimando...\n");
 	return 0;
-
 }
 
-int aplica_mov(char *buf, char *campo, int tam,
+
+void transform_e(char campo[], char campo_target[], int i_bola, int tam){
+	printf("t1\n");
+	strcpy(campo_target, campo);
+	printf("t2\n");
+	int i_sub = i_bola+1;
+	campo_target[i_bola] = campo_target[i_sub];
+	printf("t3\n");
+	campo_target[i_sub] = 'o';
+	int qt_impar = 0;
+	int max_impar = -1;
+	printf("=i_sub=%d\n", i_sub);
+	printf("=tam=%d\n", tam);
+
+	for(int i = i_sub;i<tam;i++){
+		printf("%d.", i);
+		if(campo_target[i]=='.'){
+			qt_impar++;
+			max_impar=i;
+		}else{
+			if(qt_impar%2!=0){
+				campo_target[max_impar]='f';
+				qt_impar = 0;
+				max_impar = -1;	
+			}
+		}
+		if(i==tam-1){
+			if(qt_impar%2!=0){
+				campo_target[max_impar]='f';
+				qt_impar = 0;
+				max_impar = -1;	
+			}	
+		}
+		printf(".");
+	}
+	printf("\nFIM>>transform_e");
+}
+
+void summing_e(char campo[], int bola, int tam, int sum[]){
+	int bsum = 0;
+	int psum = 0;
+	for(int i = tam-1;i>=bola;i--){
+		if(i==bola){
+			if(campo[i]=='.'){
+				bsum++;
+				psum++;
+			}
+			if(bsum>0 && campo[i]=='f'){
+				bsum--;
+			}
+		}else{
+			if(campo[i]=='.'){
+				bsum++;
+				psum++;
+			}
+			if(bsum>0 && campo[i]=='f'){
+				bsum--;
+			}
+			if(psum>0 && campo[i]=='f'){
+				psum--;
+			}	
+		}
+		
+	}
+	sum[0] = bsum;
+	sum[1] = psum;
+}
+
+
+
+
+int pl(int bsum, int psum){
+	int p_e = 0;
+	int kno = 0;
+	if(bsum == psum){
+		kno=1;
+	}
+	p_e = floor(bsum/4)+(1-kno);
+
+	return p_e;
+}
+
+
+
+
+//Estimativa para d
+void summing_d(char campo[], int bola, int tam, int sum[]){
+	int bsum = 0;
+	int psum = 0;
+	for(int i = 0;i<=bola;i++){
+		if(i==bola){
+			if(campo[i]=='.'){
+				bsum++;
+				psum++;
+			}
+			if(bsum>0 && campo[i]=='f'){
+				bsum--;
+			}
+		}else{
+			if(campo[i]=='.'){
+				bsum++;
+				psum++;
+			}
+			if(bsum>0 && campo[i]=='f'){
+				bsum--;
+			}
+			if(psum>0 && campo[i]=='f'){
+				psum--;
+			}	
+		}
+		
+	}
+	sum[0] = bsum;
+	sum[1] = psum;
+}
+
+void transform_d(char campo[], char pl[], int i_bola, int tam){
+	strcpy(pl, campo);
+	int i_sub = i_bola-1;
+	pl[i_bola] = pl[i_sub];
+	pl[i_sub] = 'o';
+	int qt_impar = 0;
+	int max_impar = -1;
+	for(int i = i_sub;i>=0;i--){
+		if(pl[i]=='.'){
+			qt_impar++;
+			max_impar=i;
+		}else{
+			if(qt_impar%2!=0){
+				pl[max_impar]='f';
+				qt_impar = 0;
+				max_impar = -1;	
+			}
+		}
+		if(i==0){
+			if(qt_impar%2!=0){
+				pl[max_impar]='f';
+				qt_impar = 0;
+				max_impar = -1;	
+			}	
+		}
+	}
+	return pl;
+}
+
+//Obtem index da bola
+int get_bola(char campo[], int tam){
+	for(int i = 0;i<tam;i++){
+		if(campo[i]=='o'){
+			return i;
+		}
+	}
+	return -1;
+}
+
+char *array_to_str(char * str, int *array, unsigned int n) {
+  int r;
+  if (n == 0) return 0;
+  if (n == 1) r = sprintf(str, "%d\0", array[0]);
+  else        r = sprintf(str, "%d ", array[0]);
+  array_to_str(str + r, array + 1, n - 1); 
+  return str;
+}
+
+int aplica_mov(char buf[], char campo[], int tam,
 	       char rl, char rm, int rf, int rs, int *rb) {
 
   int i, j, inc, bola;
@@ -220,7 +347,8 @@ int aplica_mov(char *buf, char *campo, int tam,
 }
 
 
-int vetor_saltos_para_d(int saltos[], char * campo, int bola, int tam){
+
+int vetor_saltos_para_d(int saltos[], char campo[], int bola, int tam){
 	if(campo[bola+1]!='.'){
 		int qt_pontos = 0;
 		int index = 0;
@@ -235,7 +363,6 @@ int vetor_saltos_para_d(int saltos[], char * campo, int bola, int tam){
 				continue;
 			}else if(campo[i]=='.' && qt_pontos==0){
 				qt_pontos++;
-				//alcanÃ§avel
 				saltos[index]=i+1;
 				index++;
 			}else if(campo[i]=='.' && qt_pontos!=0){
@@ -248,7 +375,7 @@ int vetor_saltos_para_d(int saltos[], char * campo, int bola, int tam){
 }
 
 
-int vetor_saltos_para_e(int saltos[], char * campo, int bola, int tam){
+int vetor_saltos_para_e(int saltos[], char campo[], int bola, int tam){
 		if(campo[bola-1]!='.'){
 			int qt_pontos = 0;
 			int index = 0;
@@ -263,7 +390,6 @@ int vetor_saltos_para_e(int saltos[], char * campo, int bola, int tam){
 					continue;
 				}else if(campo[i]=='.' && qt_pontos==0){
 					qt_pontos++;
-					//alcanÃ§avel
 					saltos[index]=i+1;
 					index++;
 				}else if(campo[i]=='.' && qt_pontos!=0){
@@ -276,7 +402,9 @@ int vetor_saltos_para_e(int saltos[], char * campo, int bola, int tam){
 }
 
 
-int gerar_movimentos(char* campo, int tam, int jogador, int bola, movimento movimentos[], char lado_meu){
+
+
+int gerar_movimentos(char campo[], int tam, int jogador, int bola, movimento movimentos[], char lado_meu){
 	int qt_movimentos_possiveis = 0;
 	for(int i = 0;i<tam;i++){
 		if(campo[i]=='.'){
@@ -349,159 +477,3 @@ int gerar_movimentos(char* campo, int tam, int jogador, int bola, movimento movi
 	}
 	return qt_movimentos_possiveis;
 }
-
-bool pode_vencer(char campo[], int jogador, int tam){
-	return false;
-}
-
-double sigmoide(double x){
-	return 1.0/(1+exp(-x));
-}
-
-
-void summing_e(char * campo, int bola, int tam, int sum[]){
-	int bsum = 0;
-	int psum = 0;
-	for(int i = tam-1;i>=bola;i--){
-		if(i==bola){
-			if(campo[i]=='.'){
-				bsum++;
-				psum++;
-			}
-			if(bsum>0 && campo[i]=='f'){
-				bsum--;
-			}
-		}else{
-			if(campo[i]=='.'){
-				bsum++;
-				psum++;
-			}
-			if(bsum>0 && campo[i]=='f'){
-				bsum--;
-			}
-			if(psum>0 && campo[i]=='f'){
-				psum--;
-			}	
-		}
-		
-	}
-	sum[0] = bsum;
-	sum[1] = psum;
-}
-
-char * transform_e(char * campo, int i_bola, int tam){
-	char * pl;
-	strcpy(pl, campo);
-	int i_sub = i_bola+1;
-	pl[i_bola] = pl[i_sub];
-	pl[i_sub] = 'o';
-	int qt_impar = 0;
-	int max_impar = -1;
-	for(int i = i_sub;i<tam;i++){
-		if(pl[i]=='.'){
-			qt_impar++;
-			max_impar=i;
-		}else{
-			if(qt_impar%2!=0){
-				pl[max_impar]='f';
-				qt_impar = 0;
-				max_impar = -1;	
-			}
-		}
-		if(i==tam-1){
-			if(qt_impar%2!=0){
-				pl[max_impar]='f';
-				qt_impar = 0;
-				max_impar = -1;	
-			}	
-		}
-	}
-	return pl;
-}
-
-
-
-int pl(int bsum, int psum){
-	int p_e = 0;
-	int kno = 0;
-	if(bsum == psum){
-		kno=1;
-	}
-	p_e = floor(bsum/4)+(1-kno);
-
-	return p_e;
-}
-
-
-
-
-//Estimativa para d
-void summing_d(char * campo, int bola, int tam, int sum[]){
-	int bsum = 0;
-	int psum = 0;
-	for(int i = 0;i<=bola;i++){
-		if(i==bola){
-			if(campo[i]=='.'){
-				bsum++;
-				psum++;
-			}
-			if(bsum>0 && campo[i]=='f'){
-				bsum--;
-			}
-		}else{
-			if(campo[i]=='.'){
-				bsum++;
-				psum++;
-			}
-			if(bsum>0 && campo[i]=='f'){
-				bsum--;
-			}
-			if(psum>0 && campo[i]=='f'){
-				psum--;
-			}	
-		}
-		
-	}
-	sum[0] = bsum;
-	sum[1] = psum;
-}
-
-char * transform_d(char * campo, int i_bola, int tam){
-	char * pl;
-	strcpy(pl, campo);
-	int i_sub = i_bola-1;
-	pl[i_bola] = pl[i_sub];
-	pl[i_sub] = 'o';
-	int qt_impar = 0;
-	int max_impar = -1;
-	for(int i = i_sub;i>=0;i--){
-		if(pl[i]=='.'){
-			qt_impar++;
-			max_impar=i;
-		}else{
-			if(qt_impar%2!=0){
-				pl[max_impar]='f';
-				qt_impar = 0;
-				max_impar = -1;	
-			}
-		}
-		if(i==0){
-			if(qt_impar%2!=0){
-				pl[max_impar]='f';
-				qt_impar = 0;
-				max_impar = -1;	
-			}	
-		}
-	}
-	return pl;
-}
-
-char *array_to_str(char * str, int *array, unsigned int n) {
-  int r;
-  if (n == 0) return 0;
-  if (n == 1) r = sprintf(str, "%d\0", array[0]);
-  else        r = sprintf(str, "%d ", array[0]);
-  array_to_str(str + r, array + 1, n - 1); 
-  return str;
-}
-
