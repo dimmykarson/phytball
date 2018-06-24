@@ -1,45 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "testcampo.h"
+#include "campo.h"
 #include <stdbool.h>
 #include <float.h>
 #include <math.h>
 
 #define MAXSTR 512
 #define MAXINT 16
-#define MAXD 2
+#define MAXD 4
 #define MAXACOES 100
 
 #define new_max(x,y) ((x) >= (y)) ? (x) : (y)
 #define new_min(x,y) ((x) <= (y)) ? (x) : (y)
-
-
-movimento def_movimento(char campo[], int tam, char lado_meu);
-int gerar_movimentos(char* campo, int tam, int jogador, int bola, movimento movimentos[], char lado_meu);
-
-bool pode_vencer(char campo[], int jogador, int tam);
-double minimax(char * campo, int jogador, double alpha, double beta, int depth, int tam, char lado_meu, char jogador_vez);
-
-
-
-double estimativa(char campo[], int tam, int bola, int jogador, char lado_meu);
-void parse_mov(char *buf, char *rl, char *rm, int *rf, int *rs, int *rb);
-int aplica_mov(char *buf, char *campo, int tam, char rl, char rm, int rf, int rs, int *rb);
-int get_bola(char * campo, int tam);
-
-double sigmoide(double x);
-
-
-char * transform_e(char * campo, int i_bola, int tam);
-void summing_e(char * campo, int bola, int tam, int sum[]);
-int pl(int bsum, int psum);
-
-
-char * transform_d(char * campo, int i_bola, int tam);
-void summing_d(char * campo, int bola, int tam, int sum[]);
-
-char *array_to_str(char * str, int *array, unsigned int n);
 
 int main(int argc, char **argv) {
 	char buf[MAXSTR];
@@ -52,36 +25,33 @@ int main(int argc, char **argv) {
 	int pos_bola[MAXINT];
 	int num_saltos;
 	int i;
-
-
-
-	campo_conecta(argc, argv);
-	printf("Player conectado\n");
 	
-	while(1) {
-	    campo_recebe(buf);
-	    printf("%s", buf);
+	campo_conecta(argc, argv);
 
+	while(1) {
+	    /**
+	    campo_recebe(buf);
+	    printf("%s\n", buf);
 		sscanf(strtok(buf, " \n"), "%c", &lado_meu);
 		sscanf(strtok(NULL, " \n"), "%d", &tam_campo);
 		sscanf(strtok(NULL, " \n"), "%s", campo);
 		sscanf(strtok(NULL, " \n"), "%c", &lado_adv);
 		sscanf(strtok(NULL, " \n"), "%c", &mov_adv);
-		
-
-
-		movimento mov = def_movimento(campo, tam_campo, lado_meu);
-
-
-
-		//sprintf(buf, "%c %c %d\n", mov->player, mov->tipo, 1);
-
-
-	    campo_envia(buf);
+		printf("Params: %c %d\n", lado_meu, tam_campo);
+		**/
+		char * t_campo = "......o......";
+		tam_campo = 13;
+		lado_meu = 'e';
+		movimento mov = def_movimento(t_campo, tam_campo, lado_meu);
+		//sprintf(buf, "%s\n", mov.mov);
+	    //campo_envia(buf);
+	    break;
   	}
+  	return 1;
 }
 
 movimento def_movimento(char campo[], int tam, char lado_meu){
+	printf("1.");
 	movimento mov_to_do;
 	double aux = -INFINITY;
 	movimento acoes[MAXACOES];
@@ -94,6 +64,7 @@ movimento def_movimento(char campo[], int tam, char lado_meu){
 			mov_to_do = acoes[i];
 		}
 	}
+	printf("1.1");	
 	return mov_to_do;
 }
 
@@ -126,14 +97,6 @@ double minimax(char * campo, int jogador, double alpha, double beta, int depth, 
 			//Gerando No para ação i
 			char * result;
 			movimento mov = acoes[i];
-			/**
-			char rl;
-	  		char rm;
-	  		int rf;
-	  		int rs;
-	  		int rb[MAXINT];
-			parse_mov(mov.mov, &rl, &rm, &rf, &rs, rb);
-			**/
 			result = (char*)malloc(sizeof(campo));
 			aplica_mov(campo, result, tam, jogador_vez, mov.tipo, mov.posicao, mov.qt_saltos, mov.saltos);
 			int depth_aux = depth-1;
@@ -152,14 +115,6 @@ double minimax(char * campo, int jogador, double alpha, double beta, int depth, 
 			//Gerando No para ação i
 			char * result;
 			movimento mov = acoes[i];
-			/**
-			char rl;
-	  		char rm;
-	  		int rf;
-	  		int rs;
-	  		int rb[MAXINT];
-			parse_mov(mov.mov, &rl, &rm, &rf, &rs, rb);
-			**/
 			result = (char*)malloc(sizeof(campo));
 			aplica_mov(campo, result, tam, jogador_vez, mov.tipo, mov.posicao, mov.qt_saltos, mov.saltos);
 			int depth_aux = depth-1;
@@ -295,6 +250,7 @@ int vetor_saltos_para_e(int saltos[], char * campo, int bola, int tam){
 
 
 int gerar_movimentos(char* campo, int tam, int jogador, int bola, movimento movimentos[], char lado_meu){
+	printf("2.");
 	int qt_movimentos_possiveis = 0;
 	for(int i = 0;i<tam;i++){
 		if(campo[i]=='.'){
@@ -365,6 +321,7 @@ int gerar_movimentos(char* campo, int tam, int jogador, int bola, movimento movi
 			qt_movimentos_possiveis++;	
 		}
 	}
+	printf("2.");
 	return qt_movimentos_possiveis;
 }
 
@@ -522,3 +479,6 @@ char *array_to_str(char * str, int *array, unsigned int n) {
   array_to_str(str + r, array + 1, n - 1); 
   return str;
 }
+
+
+

@@ -1,6 +1,6 @@
 CFLAGS = -g -Wall -Wno-unused-result -O3 -lm
 LDLIBS = -l hiredis -l readline
-LIBS = -lm
+LIBS = -lm -w
 
 all: controlador principal exemplo2
 
