@@ -5,7 +5,6 @@
 void campo_conecta(int, char**);
 void campo_envia(char*);
 void campo_recebe(char*);
-
 typedef struct {
   char player;
   char tipo;
@@ -16,7 +15,7 @@ typedef struct {
   double h;
   bool terminal;
   char* campo;
-  char* mov;
+  char mov[128];
 } movimento;
 
 #endif

@@ -9,3 +9,6 @@ test*
 campo.h.gch
 campo.o
 principal.o
+Makefile.win
+Projeto1.*
+gmon.out
